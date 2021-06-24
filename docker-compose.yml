@@ -1,0 +1,104 @@
+version: '3'
+
+services:
+  nextcloud_db:
+    image: mariadb:10.4
+    volumes:
+      - ../data/mysql:/var/lib/mysql
+    restart: always
+
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+    networks:
+      - database
+
+
+  nextcloud_app:  
+    image: nextcloud:21
+    restart: always
+    depends_on:
+      - nextcloud_db
+    volumes:
+      - ../data/www/html:/var/www/html
+      - /other_volume:/other_volume:ro
+
+    hostname: nextcloud
+    networks:
+      - database
+      - frontend
+
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=frontend
+
+      - traefik.http.routers.nextcloud.middlewares=nextcloud,nextcloud_redirect
+      - traefik.http.routers.nextcloud.tls.certresolver=myresolver
+      - traefik.http.routers.nextcloud.rule=Host(`nextcloud.${DOMAIN}`)
+
+      - traefik.http.middlewares.nextcloud.headers.customFrameOptionsValue=ALLOW-FROM https://${DOMAIN}
+      - traefik.http.middlewares.nextcloud.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN}
+      - traefik.http.middlewares.nextcloud.headers.stsSeconds=155520011
+      - traefik.http.middlewares.nextcloud.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.nextcloud.headers.stsPreload=true
+      - traefik.http.middlewares.nextcloud.headers.accesscontrolalloworigin=*
+      
+      - traefik.http.middlewares.nextcloud_redirect.redirectregex.regex=/.well-known/(card|cal)dav
+      - traefik.http.middlewares.nextcloud_redirect.redirectregex.replacement=/remote.php/dav/
+
+    deploy:
+      resources:
+          limits:
+            cpus: 4
+            memory: 1024M
+
+
+
+  onlyoffice:
+    container_name: onlyoffice
+    restart: always
+    hostname: onlyoffice
+    depends_on:
+      - nextcloud_app
+    image: onlyoffice/documentserver:6.3
+    restart: always
+    networks:
+      - frontend
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=frontend
+
+      - traefik.http.routers.onlyoffice.middlewares=onlyoffice
+      - traefik.http.routers.onlyoffice.tls.certresolver=myresolver
+      - traefik.http.routers.onlyoffice.rule=Host(`onlyoffice.${DOMAIN}`)
+      
+      - traefik.http.middlewares.onlyoffice.headers.customFrameOptionsValue=ALLOW-FROM https://${DOMAIN}
+      - traefik.http.middlewares.onlyoffice.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN}
+      - traefik.http.middlewares.onlyoffice.headers.stsSeconds=155520011
+      - traefik.http.middlewares.onlyoffice.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.onlyoffice.headers.stsPreload=true
+    
+
+
+      ## Extra headers for onlyoffice
+      - traefik.http.routers.onlyoffice.tls=true
+      - traefik.http.middlewares.cors-headers.headers.accessControlAllowOrigin=*
+      - traefik.http.middlewares.onlyoffice.headers.customRequestHeaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.onlyoffice.headers.accesscontrolalloworigin=*
+
+    deploy:
+      resources:
+          limits:
+            cpus: 3
+            memory: 2048M
+    
+networks:
+  frontend_3peaks:
+    external:
+      name: frontend
+  nextcloud_db:
+    external:
+      name: database
+

@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+  traefik:
+    image: "traefik:chevrotin"
+    container_name: "traefik"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.network=frontend"
+      - "--providers.docker.exposedbydefault=true"
+
+      - "--entrypoints.entrypoints-https.address=:443"
+      - "--entrypoints.entrypoints-http.address=:80"
+      - "--entrypoints.entrypoints-http.http.redirections.entryPoint.to=entrypoints-https"
+      - "--entrypoints.entrypoints-http.http.redirections.entryPoint.scheme=https"
+
+
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=entrypoints-http"
+
+
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: always
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    external: true
