@@ -2,6 +2,8 @@
 A Docker stack for Nextcloud with Onlyoffice behind Traefik, with https !
 
 
+Change .env variable.
+
 create frontend and database network
 
 ```
@@ -19,4 +21,10 @@ Start Nextcloud Stack
 docker-compose up -d
 ```
 
+
 Configure Nextcloud.
+allow to set onlyoffice as local conainer. Within the nextcloud contener :
+```
+sudo -u www-data sh -c "php occ --no-warnings config:system:set allow_local_remote_servers --value=true"
+```
+

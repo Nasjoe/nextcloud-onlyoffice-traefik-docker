@@ -36,11 +36,12 @@ services:
 
       - traefik.http.routers.nextcloud.middlewares=nextcloud,nextcloud_redirect
       - traefik.http.routers.nextcloud.tls.certresolver=myresolver
-      - traefik.http.routers.nextcloud.rule=Host(`nextcloud.${DOMAIN}`)
+      - traefik.http.routers.nextcloud.rule=Host(`nextcloud.${DOMAIN}`) || Host(`nextcloud.${DOMAIN2}`)
 
       - traefik.http.middlewares.nextcloud.headers.customFrameOptionsValue=ALLOW-FROM https://${DOMAIN}
-      - traefik.http.middlewares.nextcloud.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN}
-      
+      - traefik.http.middlewares.nextcloud.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN} ${DOMAIN2} *.${DOMAIN2}
+
+
       - traefik.http.middlewares.nextcloud.headers.stsSeconds=155520011
       - traefik.http.middlewares.nextcloud.headers.stsIncludeSubdomains=true
       - traefik.http.middlewares.nextcloud.headers.stsPreload=true
@@ -77,7 +78,7 @@ services:
       - traefik.http.routers.onlyoffice.rule=Host(`onlyoffice.${DOMAIN}`)
       
       - traefik.http.middlewares.onlyoffice.headers.customFrameOptionsValue=ALLOW-FROM https://${DOMAIN}
-      - traefik.http.middlewares.onlyoffice.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN}
+      - traefik.http.middlewares.onlyoffice.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN} ${DOMAIN2} *.${DOMAIN2}
       - traefik.http.middlewares.onlyoffice.headers.stsSeconds=155520011
       - traefik.http.middlewares.onlyoffice.headers.stsIncludeSubdomains=true
       - traefik.http.middlewares.onlyoffice.headers.stsPreload=true
@@ -97,7 +98,7 @@ services:
             memory: 2048M
     
 networks:
-  frontend_3peaks:
+  frontend:
     external:
       name: frontend
   nextcloud_db:
