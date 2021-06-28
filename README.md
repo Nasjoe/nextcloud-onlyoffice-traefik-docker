@@ -23,7 +23,7 @@ docker-compose up -d
 
 
 Configure Nextcloud.
-allow to set onlyoffice as local conainer. Within the nextcloud contener :
+allow to set onlyoffice as local container. Within the nextcloud container :
 ```
 sudo -u www-data sh -c "php occ --no-warnings config:system:set allow_local_remote_servers --value=true"
 ```
