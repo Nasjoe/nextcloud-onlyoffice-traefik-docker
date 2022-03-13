@@ -17,7 +17,7 @@ services:
 
 
   nextcloud_app:  
-    image: nextcloud:21
+    image: nextcloud:22
     restart: always
     depends_on:
       - nextcloud_db
@@ -97,10 +97,10 @@ services:
             memory: 2048M
     
 networks:
-  frontend_3peaks:
+  frontend:
     external:
       name: frontend
-  nextcloud_db:
+  database:
     external:
       name: database
 
