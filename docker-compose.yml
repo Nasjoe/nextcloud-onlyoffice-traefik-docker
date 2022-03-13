@@ -36,7 +36,7 @@ services:
 
       - traefik.http.routers.nextcloud.middlewares=nextcloud,nextcloud_redirect
       - traefik.http.routers.nextcloud.tls.certresolver=myresolver
-      - traefik.http.routers.nextcloud.rule=Host(`nextcloud.${DOMAIN}`)
+      - traefik.http.routers.nextcloud.rule=Host(`${NEXTCLOUD_DOMAIN}`)
 
       - traefik.http.middlewares.nextcloud.headers.customFrameOptionsValue=ALLOW-FROM https://${DOMAIN}
       - traefik.http.middlewares.nextcloud.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN}
@@ -74,7 +74,7 @@ services:
 
       - traefik.http.routers.onlyoffice.middlewares=onlyoffice
       - traefik.http.routers.onlyoffice.tls.certresolver=myresolver
-      - traefik.http.routers.onlyoffice.rule=Host(`onlyoffice.${DOMAIN}`)
+      - traefik.http.routers.onlyoffice.rule=Host(`${ONLYOFFICE_DOMAIN}`)
       
       - traefik.http.middlewares.onlyoffice.headers.customFrameOptionsValue=ALLOW-FROM https://${DOMAIN}
       - traefik.http.middlewares.onlyoffice.headers.contentSecurityPolicy=frame-ancestors 'self' ${DOMAIN} *.${DOMAIN}
